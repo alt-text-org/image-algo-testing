@@ -1,3 +1,4 @@
 images/
 .idea/
+node_modules/
 .env
