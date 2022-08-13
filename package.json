@@ -1,11 +1,17 @@
 {
   "name": "algo-test-harness",
   "version": "1.0.0",
-  "description": "",
+  "description": "Test harness for several image similarity algorithms using the Pinecone vector DB",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "engines": {
+    "node": "16.15.0"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.9.3",
+    "node-fetch": "^2.6.6",
+    "numjs": "^0.16.1",
+    "underscore": "^1.13.4"
+  }
 }
