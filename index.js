@@ -53,10 +53,10 @@ function outputResultCSV(name, arr) {
 function run(name, metric, sourceFolder, handler, pineconeUrl) {
     const pinecone = makePineconeClient(pineconeApiKey, pineconeUrl)
     const start = Date.now()
-    let tweakImageTimes = []
-    let vectorCalcTimes = []
-    let upsertTimes = []
-    let queryTimes = []
+    const tweakImageTimes = []
+    const vectorCalcTimes = []
+    const upsertTimes = []
+    const queryTimes = []
 
     fs.readdir(sourceFolder, async (err, files) => {
         const vectorGroups = {}
@@ -101,29 +101,29 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         const inserted = await Promise.all(promises)
         console.log(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
 
-        let sameReturnedOver90 = [];
-        let sameReturnedOver95 = [];
-        let sameReturnedOver99 = [];
-        let sameReturnedOver999 = [];
-        let sameTopIsCorrect = [];
+        const sameReturnedOver90 = [];
+        const sameReturnedOver95 = [];
+        const sameReturnedOver99 = [];
+        const sameReturnedOver999 = [];
+        const sameTopIsCorrect = [];
 
-        let croppedReturnedOver90 = [];
-        let croppedReturnedOver95 = [];
-        let croppedReturnedOver99 = [];
-        let croppedReturnedOver999 = [];
-        let croppedTopIsCorrect = [];
+        const croppedReturnedOver90 = [];
+        const croppedReturnedOver95 = [];
+        const croppedReturnedOver99 = [];
+        const croppedReturnedOver999 = [];
+        const croppedTopIsCorrect = [];
 
-        let grownReturnedOver90 = [];
-        let grownReturnedOver95 = [];
-        let grownReturnedOver99 = [];
-        let grownReturnedOver999 = [];
-        let grownTopIsCorrect = [];
+        const grownReturnedOver90 = [];
+        const grownReturnedOver95 = [];
+        const grownReturnedOver99 = [];
+        const grownReturnedOver999 = [];
+        const grownTopIsCorrect = [];
 
-        let shrunkReturnedOver90 = [];
-        let shrunkReturnedOver95 = [];
-        let shrunkReturnedOver99 = [];
-        let shrunkReturnedOver999 = [];
-        let shrunkTopIsCorrect = [];
+        const shrunkReturnedOver90 = [];
+        const shrunkReturnedOver95 = [];
+        const shrunkReturnedOver99 = [];
+        const shrunkReturnedOver999 = [];
+        const shrunkTopIsCorrect = [];
 
         const query = async (vector, sha, returnedOver90, returnedOver95, returnedOver99, returnedOver999, topIsCorrect) => {
             const queryStart = Date.now()
@@ -147,30 +147,30 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
             await query(vectorGroup.shrunk, sha, shrunkReturnedOver90, shrunkReturnedOver95, shrunkReturnedOver99, shrunkReturnedOver999, shrunkTopIsCorrect)
         }
 
-        sameReturnedOver90 = sameReturnedOver90.sort()
-        sameReturnedOver95 = sameReturnedOver95.sort()
-        sameReturnedOver99 = sameReturnedOver99.sort()
-        sameReturnedOver999 = sameReturnedOver999.sort()
+        sameReturnedOver90.sort((a, b) => a - b)
+        sameReturnedOver95.sort((a, b) => a - b)
+        sameReturnedOver99.sort((a, b) => a - b)
+        sameReturnedOver999.sort((a, b) => a - b)
 
-        croppedReturnedOver90 = croppedReturnedOver90.sort()
-        croppedReturnedOver95 = croppedReturnedOver95.sort()
-        croppedReturnedOver99 = croppedReturnedOver99.sort()
-        croppedReturnedOver999 = croppedReturnedOver999.sort()
+        croppedReturnedOver90.sort((a, b) => a - b)
+        croppedReturnedOver95.sort((a, b) => a - b)
+        croppedReturnedOver99.sort((a, b) => a - b)
+        croppedReturnedOver999.sort((a, b) => a - b)
 
-        grownReturnedOver90 = grownReturnedOver90.sort()
-        grownReturnedOver95 = grownReturnedOver95.sort()
-        grownReturnedOver99 = grownReturnedOver99.sort()
-        grownReturnedOver999 = grownReturnedOver999.sort()
+        grownReturnedOver90.sort((a, b) => a - b)
+        grownReturnedOver95.sort((a, b) => a - b)
+        grownReturnedOver99.sort((a, b) => a - b)
+        grownReturnedOver999.sort((a, b) => a - b)
 
-        shrunkReturnedOver90 = shrunkReturnedOver90.sort()
-        shrunkReturnedOver95 = shrunkReturnedOver95.sort()
-        shrunkReturnedOver99 = shrunkReturnedOver99.sort()
-        shrunkReturnedOver999 = shrunkReturnedOver999.sort()
+        shrunkReturnedOver90.sort((a, b) => a - b)
+        shrunkReturnedOver95.sort((a, b) => a - b)
+        shrunkReturnedOver99.sort((a, b) => a - b)
+        shrunkReturnedOver999.sort((a, b) => a - b)
 
-        tweakImageTimes = tweakImageTimes.sort()
-        vectorCalcTimes = vectorCalcTimes.sort()
-        upsertTimes = upsertTimes.sort()
-        queryTimes = queryTimes.sort()
+        tweakImageTimes.sort((a, b) => a - b)
+        vectorCalcTimes.sort((a, b) => a - b)
+        upsertTimes.sort((a, b) => a - b)
+        queryTimes.sort((a, b) => a - b)
 
         console.log(`Finished in ${Date.now() - start}ms`)
         console.log()
