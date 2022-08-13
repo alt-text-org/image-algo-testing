@@ -53,6 +53,9 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
 
                 vectors[sha] = vector;
                 return await pinecone.upsert(sha, vector)
+            }).catch(err => {
+                console.error(err)
+                return false
             }))
         }
 
@@ -83,7 +86,7 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         returnedOver999 = returnedOver999.sort()
 
         console.log("Similarity Function,Distance Metric,Top Result Correct")
-        console.log(`${name},${metric},${correctPct(topIsCorrect)}`)
+        console.log(`${name},${metric},${correctPct(topIsCorrect) * 100}%`)
         console.log("Count of #,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
         console.log(`Returned with score > 0.90,${average(returnedOver90)},${returnedOver90[0]},${getQuantile(returnedOver90, 0.25)},${getQuantile(returnedOver90, 0.50)},${getQuantile(returnedOver90, 0.75)},${getQuantile(returnedOver90, 0.9)},${getQuantile(returnedOver90, 0.95)},${getQuantile(returnedOver90, 0.99)},${getQuantile(returnedOver90, 0.999)},${returnedOver90[returnedOver90.length - 1]}`)
         console.log(`Returned with score > 0.95,${average(returnedOver95)},${returnedOver95[0]},${getQuantile(returnedOver95, 0.25)},${getQuantile(returnedOver95, 0.50)},${getQuantile(returnedOver95, 0.75)},${getQuantile(returnedOver95, 0.9)},${getQuantile(returnedOver95, 0.95)},${getQuantile(returnedOver95, 0.99)},${getQuantile(returnedOver95, 0.999)},${returnedOver95[returnedOver95.length - 1]}`)
