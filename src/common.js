@@ -1,4 +1,4 @@
-const {createCanvas} = require("canvas");
+const {createCanvas, Image} = require("canvas");
 
 function shrinkImage(image, imageData, edgeLength) {
     let canvas = createCanvas(edgeLength, edgeLength)

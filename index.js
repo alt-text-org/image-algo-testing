@@ -52,6 +52,11 @@ function outputResultCSV(name, arr) {
 
 function run(name, metric, sourceFolder, handler, pineconeUrl) {
     const pinecone = makePineconeClient(pineconeApiKey, pineconeUrl)
+    const start = Date.now()
+    let tweakImageTimes = []
+    let vectorCalcTimes = []
+    let upsertTimes = []
+    let queryTimes = []
 
     fs.readdir(sourceFolder, async (err, files) => {
         const vectorGroups = {}
@@ -64,20 +69,29 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
                 ctx.drawImage(image, 0, 0, image.width, image.height)
                 const imageData = ctx.getImageData(0, 0, image.width, image.height)
 
-                const {croppedImage, croppedImageData} = cropImage(image, imageData, 0.90)
-                const grown = scaleImage(image, imageData, 2)
-                const shrunk = scaleImage(image, imageData, 0.5)
+                const tweakStart = Date.now()
+                const {croppedImage, croppedImageData} = await cropImage(image, imageData, 0.90)
+                const grown = await scaleImage(image, imageData, 2)
+                const shrunk = await scaleImage(image, imageData, 0.5)
+                tweakImageTimes.push(Date.now() - tweakStart)
 
+                const vectorCalcStart = Date.now()
                 const vectorGroup = {
-                    same: handler(image, imageData),
-                    cropped: handler(croppedImage, croppedImageData),
-                    grown: handler(grown.scaledImage, grown.scaledImageData),
-                    shrunk: handler(shrunk.scaledImage, shrunk.scaledImageData)
+                    same: await handler(image, imageData),
+                    cropped: await handler(croppedImage, croppedImageData),
+                    grown: await handler(grown.scaledImage, grown.scaledImageData),
+                    shrunk: await handler(shrunk.scaledImage, shrunk.scaledImageData)
                 }
+                vectorCalcTimes.push(Date.now() - vectorCalcStart)
                 const sha = sha256(imageData)
 
                 vectorGroups[sha] = vectorGroup;
-                return await pinecone.upsert(sha, vectorGroup.same)
+
+                const upsertStart = Date.now()
+                const upsertSuccess = await pinecone.upsert(sha, vectorGroup.same)
+                upsertTimes.push(Date.now() - upsertStart)
+
+                return upsertSuccess
             }).catch(err => {
                 console.error(err)
                 return false
@@ -112,7 +126,10 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         let shrunkTopIsCorrect = [];
 
         const query = async (vector, sha, returnedOver90, returnedOver95, returnedOver99, returnedOver999, topIsCorrect) => {
+            const queryStart = Date.now()
             const results = await pinecone.query(vector, 10);
+            queryTimes.push(Date.now() - queryStart)
+
             returnedOver90.push(countMatchesOver(results, 0.90))
             returnedOver95.push(countMatchesOver(results, 0.95))
             returnedOver99.push(countMatchesOver(results, 0.99))
@@ -150,8 +167,24 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         shrunkReturnedOver99 = shrunkReturnedOver99.sort()
         shrunkReturnedOver999 = shrunkReturnedOver999.sort()
 
+        tweakImageTimes = tweakImageTimes.sort()
+        vectorCalcTimes = vectorCalcTimes.sort()
+        upsertTimes = upsertTimes.sort()
+        queryTimes = queryTimes.sort()
+
+        console.log(`Finished in ${Date.now() - start}ms`)
+        console.log()
+
         console.log("Similarity Function,Distance Metric,Top Result Correct - Same,Top Result Correct - Cropped,Top Result Correct - 2x Size,Top Result Correct - 1/2x Size")
         console.log(`${name},${metric},${correctPct(sameTopIsCorrect) * 100}%,${correctPct(croppedTopIsCorrect) * 100}%,${correctPct(grownTopIsCorrect) * 100}%,${correctPct(shrunkTopIsCorrect) * 100}%`)
+        console.log()
+
+        console.log("Timing,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
+        outputResultCSV("Tweak Image", tweakImageTimes)
+        outputResultCSV("Calculate Vectors", vectorCalcTimes)
+        outputResultCSV("Upsert Vectors", upsertTimes)
+        outputResultCSV("Query Vectors", queryTimes)
+        console.log()
 
         console.log("Category,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
         outputResultCSV("Same - Score > 0.90", sameReturnedOver90)
