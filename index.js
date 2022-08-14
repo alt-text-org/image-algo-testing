@@ -74,6 +74,7 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         const promises = []
 
         for (let file of files.filter(f => f.match(/.*jpg/))) {
+            console.error(`Processing ${file}`)
             const {image, imageData} = await loadImageFile(`${sourceFolder}/${file}`)
             const {image: shrunkImage, imageData: shrunkImageData} = await loadImageFile(`${sourceFolder}/shrunk/${file}`)
             const {image: grownImage, imageData: grownImageData} = await loadImageFile(`${sourceFolder}/grown/${file}`)
@@ -132,7 +133,6 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         const reformattedReturnedOver99 = [];
         const reformattedReturnedOver999 = [];
         const reformattedTopIsCorrect = [];
-
 
         const query = async (vector, sha, returnedOver90, returnedOver95, returnedOver99, returnedOver999, topIsCorrect) => {
             const queryStart = Date.now()
