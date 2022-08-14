@@ -29,9 +29,8 @@ function cropImage(image, imageData, pct) {
 }
 
 function writeFile(path, mime, canvas) {
-    console.log(path)
+    console.log(`Writing: ${path}`)
     const buffer = canvas.toBuffer(mime)
-    console.log(!!buffer)
     fs.writeFileSync(path, buffer)
 }
 
