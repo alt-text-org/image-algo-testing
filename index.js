@@ -192,7 +192,6 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
 
     fs.readdir(sourceFolder, async (err, files) => {
         const vectorGroups = {}
-        const promises = []
 
         for (let file of files.filter(f => f.match(/.*jpg/))) {
             console.error(`Processing ${file}`)
@@ -212,19 +211,23 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
                 reformatted: await vectorizer(reformattedImage, reformattedImageData)
             }
             vectorCalcTimes.push(Date.now() - vectorCalcStart)
-            const sha = sha256(imageData)
 
+            const sha = sha256(imageData)
             vectorGroups[sha] = vectorGroup;
+        }
+
+        fs.writeFileSync(`${name}-vectors-${Date.now()}.json`, JSON.stringify(vectorGroups))
+
+        const promises = []
+        for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
             promises.push((async () => {
                 const results = await Promise.all(Object.values(pinecones).map(pc => pc.upsert(sha, vectorGroup.same)))
-                console.error(`Upserted: ${file}`)
+                console.error(`Upserted: ${vectorGroup.file}`)
                 return results.reduce((a, b) => a && b, true)
             })())
         }
-
-        fs.writeFileSync(`${name}-vectors.json`, JSON.stringify(vectorGroups))
-
         const inserted = await Promise.all(promises)
+
         console.error(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
 
         for (let [metric, pinecone] of Object.entries(pinecones)) {
