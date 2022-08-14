@@ -4,7 +4,7 @@ const {createCanvas, loadImage} = require('canvas')
 
 const {sha256} = require("./src/sha256")
 const {pHash1024} = require("./src/phash/phash")
-const {dct1024} = require("./src/dct/dct")
+const {dct1024Image} = require("./src/dct/dct")
 const {intensity1024} = require("./src/intensity/intensity")
 const {goldberg} = require("./src/image-signature-js/image_signature")
 const {makePineconeClient} = require("./src/pinecone")
@@ -209,4 +209,4 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
     });
 }
 
-run("32x32 Intensity Matrix", "Cosine", "./sample-images", intensity1024, "https://intensity-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io")
+run("Goldberg", "Cosine", "./sample-images", goldberg, "https://goldberg-544-cosine-b335ecb.svc.us-west1-gcp.pinecone.io")

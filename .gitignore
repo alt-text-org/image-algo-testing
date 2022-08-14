@@ -1,4 +1,10 @@
 images/
 .idea/
 node_modules/
+
+sample-images/reformatted/
+sample-images/grown
+sample-images/shrunk
+sample-images/cropped
+
 .env
