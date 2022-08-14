@@ -225,14 +225,13 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
         fs.writeFileSync(`${name}-vectors.json`, JSON.stringify(vectorGroups))
 
         const inserted = await Promise.all(promises)
-        console.log(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
+        console.error(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
 
         for (let [metric, pinecone] of Object.entries(pinecones)) {
             await getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
         }
 
-        console.log(`Finished in ${Date.now() - start}ms`)
-        console.log()
+        console.error(`Finished in ${Date.now() - start}ms`)
     });
 }
 
