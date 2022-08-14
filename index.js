@@ -228,7 +228,7 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
         }
         const inserted = await Promise.all(promises)
 
-        console.error(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
+        console.log(`Inserted all,${inserted.reduce((a, b) => a && b, true)}`)
 
         for (let [metric, pinecone] of Object.entries(pinecones)) {
             await getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
@@ -243,5 +243,4 @@ const pineconeUrls = {
     DotProduct: "https://goldberg-544-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
-
 run("Goldberg","./images", goldberg, pineconeUrls)
