@@ -19,32 +19,37 @@ function upserter(apiKey, url, namespace) {
             namespace: namespace,
         };
 
-        const resp = await fetch(
-            url,
-            {
-                method: "POST",
-                headers: {
-                    "Api-Key": apiKey,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            }
-        ).catch((err) => {
-            console.error(err);
-            return null;
-        });
-
-        if (resp) {
-            if (resp.ok) {
-                return true
-            } else {
-                // console.log(`Failed to save alt text text for ${sha256}: ${resp.status} - ${await resp.text()}`)
-                return false
-            }
-        } else {
-            return false
+        const delay = () => new Promise(resolve => setTimeout(resolve, 500));
+        let attempt = 1
+        while (!(await upsertOnce(apiKey, url, payload))) {
+            console.error(`Upsert failed on attempt ${attempt}`)
+            attempt++
+            await delay()
         }
     };
+}
+
+async function upsertOnce(apiKey, url, payload) {
+    const resp = await fetch(
+        url,
+        {
+            method: "POST",
+            headers: {
+                "Api-Key": apiKey,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        }
+    ).catch(() => {
+        return null;
+    });
+
+    if (resp) {
+        return !!resp.ok;
+    } else {
+        return false
+    }
+
 }
 
 function queryer(apiKey, url, namespace) {
