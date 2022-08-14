@@ -106,12 +106,16 @@ async function getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
         }
     }
 
+    let numQueried = 0;
+    const toQuery = Object.keys(vectorGroups).length
     for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
         await query(vectorGroup.same, sha, sameReturnedOver90, sameReturnedOver95, sameReturnedOver99, sameReturnedOver999, sameTopIsCorrect)
         await query(vectorGroup.cropped, sha, croppedReturnedOver90, croppedReturnedOver95, croppedReturnedOver99, croppedReturnedOver999, croppedTopIsCorrect)
         await query(vectorGroup.grown, sha, grownReturnedOver90, grownReturnedOver95, grownReturnedOver99, grownReturnedOver999, grownTopIsCorrect)
         await query(vectorGroup.shrunk, sha, shrunkReturnedOver90, shrunkReturnedOver95, shrunkReturnedOver99, shrunkReturnedOver999, shrunkTopIsCorrect)
         await query(vectorGroup.reformatted, sha, reformattedReturnedOver90, reformattedReturnedOver95, reformattedReturnedOver99, reformattedReturnedOver999, reformattedTopIsCorrect)
+        numQueried++
+        console.error(`Queried ${metric} for ${numQueried}/${toQuery}`)
     }
 
     sameReturnedOver90.sort((a, b) => a - b)
@@ -200,6 +204,7 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
 
             const vectorCalcStart = Date.now()
             const vectorGroup = {
+                file: file,
                 same: await vectorizer(image, imageData),
                 cropped: await vectorizer(croppedImage, croppedImageData),
                 grown: await vectorizer(grownImage, grownImageData),
@@ -211,10 +216,13 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
 
             vectorGroups[sha] = vectorGroup;
             promises.push((async () => {
+                console.error(`Upserting: ${file}`)
                 const results = await Promise.all(Object.values(pinecones).map(pc => pc.upsert(sha, vectorGroup.same)))
                 return results.reduce((a, b) => a && b, true)
             })())
         }
+
+        fs.writeFileSync(`${name}-vectors.json`, JSON.stringify(vectorGroups))
 
         const inserted = await Promise.all(promises)
         console.log(`Inserted all: ${inserted.reduce((a, b) => a && b, true)}`)
