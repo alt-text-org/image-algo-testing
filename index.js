@@ -8,7 +8,6 @@ const {dct1024Image} = require("./src/dct/dct")
 const {intensity1024} = require("./src/intensity/intensity")
 const {goldberg} = require("./src/image-signature-js/image_signature")
 const {makePineconeClient} = require("./src/pinecone")
-const {cropImage, scaleImage} = require("./src/common")
 
 const pineconeApiKey = process.env.PINECONE_API_KEY
 if (!pineconeApiKey) {
@@ -50,10 +49,22 @@ function outputResultCSV(name, arr) {
     )
 }
 
+async function loadImageFile(path) {
+    const image = await loadImage(path)
+    const canvas = createCanvas(image.width, image.height)
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(image, 0, 0, image.width, image.height)
+    const imageData = ctx.getImageData(0, 0, image.width, image.height)
+
+    return {
+        image: image,
+        imageData: imageData
+    }
+}
+
 function run(name, metric, sourceFolder, handler, pineconeUrl) {
     const pinecone = makePineconeClient(pineconeApiKey, pineconeUrl)
     const start = Date.now()
-    const tweakImageTimes = []
     const vectorCalcTimes = []
     const upsertTimes = []
     const queryTimes = []
@@ -62,40 +73,31 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         const vectorGroups = {}
         const promises = []
 
-        for (let file of files) {
-            promises.push(loadImage(`${sourceFolder}/${file}`).then(async (image) => {
-                const canvas = createCanvas(image.width, image.height)
-                const ctx = canvas.getContext('2d')
-                ctx.drawImage(image, 0, 0, image.width, image.height)
-                const imageData = ctx.getImageData(0, 0, image.width, image.height)
+        for (let file of files.filter(f => f.match(/.*jpg/))) {
+            const {image, imageData} = await loadImageFile(`${sourceFolder}/${file}`)
+            const {image: shrunkImage, imageData: shrunkImageData} = await loadImageFile(`${sourceFolder}/shrunk/${file}`)
+            const {image: grownImage, imageData: grownImageData} = await loadImageFile(`${sourceFolder}/grown/${file}`)
+            const {image: croppedImage, imageData: croppedImageData} = await loadImageFile(`${sourceFolder}/cropped/${file}`)
+            const {image: reformattedImage, imageData: reformattedImageData} = await loadImageFile(`${sourceFolder}/reformatted/${file.replace('jpg', 'png')}`)
 
-                const tweakStart = Date.now()
-                const {croppedImage, croppedImageData} = await cropImage(image, imageData, 0.90)
-                const grown = await scaleImage(image, imageData, 2)
-                const shrunk = await scaleImage(image, imageData, 0.5)
-                tweakImageTimes.push(Date.now() - tweakStart)
+            const vectorCalcStart = Date.now()
+            const vectorGroup = {
+                same: await handler(image, imageData),
+                cropped: await handler(croppedImage, croppedImageData),
+                grown: await handler(grownImage, grownImageData),
+                shrunk: await handler(shrunkImage, shrunkImageData),
+                reformatted: await handler(reformattedImage, reformattedImageData)
+            }
+            vectorCalcTimes.push(Date.now() - vectorCalcStart)
+            const sha = sha256(imageData)
 
-                const vectorCalcStart = Date.now()
-                const vectorGroup = {
-                    same: await handler(image, imageData),
-                    cropped: await handler(croppedImage, croppedImageData),
-                    grown: await handler(grown.scaledImage, grown.scaledImageData),
-                    shrunk: await handler(shrunk.scaledImage, shrunk.scaledImageData)
-                }
-                vectorCalcTimes.push(Date.now() - vectorCalcStart)
-                const sha = sha256(imageData)
-
-                vectorGroups[sha] = vectorGroup;
-
-                const upsertStart = Date.now()
-                const upsertSuccess = await pinecone.upsert(sha, vectorGroup.same)
-                upsertTimes.push(Date.now() - upsertStart)
-
-                return upsertSuccess
-            }).catch(err => {
-                console.error(err)
-                return false
-            }))
+            vectorGroups[sha] = vectorGroup;
+            promises.push((async () => {
+                const startUpsert = Date.now()
+                const success = await pinecone.upsert(sha, vectorGroup.same)
+                upsertTimes.push(Date.now() - startUpsert)
+                return success
+            })())
         }
 
         const inserted = await Promise.all(promises)
@@ -125,6 +127,13 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         const shrunkReturnedOver999 = [];
         const shrunkTopIsCorrect = [];
 
+        const reformattedReturnedOver90 = [];
+        const reformattedReturnedOver95 = [];
+        const reformattedReturnedOver99 = [];
+        const reformattedReturnedOver999 = [];
+        const reformattedTopIsCorrect = [];
+
+
         const query = async (vector, sha, returnedOver90, returnedOver95, returnedOver99, returnedOver999, topIsCorrect) => {
             const queryStart = Date.now()
             const results = await pinecone.query(vector, 10);
@@ -145,6 +154,7 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
             await query(vectorGroup.cropped, sha, croppedReturnedOver90, croppedReturnedOver95, croppedReturnedOver99, croppedReturnedOver999, croppedTopIsCorrect)
             await query(vectorGroup.grown, sha, grownReturnedOver90, grownReturnedOver95, grownReturnedOver99, grownReturnedOver999, grownTopIsCorrect)
             await query(vectorGroup.shrunk, sha, shrunkReturnedOver90, shrunkReturnedOver95, shrunkReturnedOver99, shrunkReturnedOver999, shrunkTopIsCorrect)
+            await query(vectorGroup.reformatted, sha, reformattedReturnedOver90, reformattedReturnedOver95, reformattedReturnedOver99, reformattedReturnedOver999, reformattedTopIsCorrect)
         }
 
         sameReturnedOver90.sort((a, b) => a - b)
@@ -167,7 +177,12 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         shrunkReturnedOver99.sort((a, b) => a - b)
         shrunkReturnedOver999.sort((a, b) => a - b)
 
-        tweakImageTimes.sort((a, b) => a - b)
+        reformattedReturnedOver90.sort((a, b) => a - b)
+        reformattedReturnedOver95.sort((a, b) => a - b)
+        reformattedReturnedOver99.sort((a, b) => a - b)
+        reformattedReturnedOver999.sort((a, b) => a - b)
+
+
         vectorCalcTimes.sort((a, b) => a - b)
         upsertTimes.sort((a, b) => a - b)
         queryTimes.sort((a, b) => a - b)
@@ -175,12 +190,11 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         console.log(`Finished in ${Date.now() - start}ms`)
         console.log()
 
-        console.log("Similarity Function,Distance Metric,Top Result Correct - Same,Top Result Correct - Cropped,Top Result Correct - 2x Size,Top Result Correct - 1/2x Size")
-        console.log(`${name},${metric},${correctPct(sameTopIsCorrect) * 100}%,${correctPct(croppedTopIsCorrect) * 100}%,${correctPct(grownTopIsCorrect) * 100}%,${correctPct(shrunkTopIsCorrect) * 100}%`)
+        console.log("Similarity Function,Distance Metric,Top Result Correct - Same,Top Result Correct - Cropped,Top Result Correct - 2x Size,Top Result Correct - 1/2x Size, Top Result Correct - Reformatted")
+        console.log(`${name},${metric},${correctPct(sameTopIsCorrect) * 100}%,${correctPct(croppedTopIsCorrect) * 100}%,${correctPct(grownTopIsCorrect) * 100}%,${correctPct(shrunkTopIsCorrect) * 100}%,${correctPct(reformattedTopIsCorrect) * 100}%`)
         console.log()
 
         console.log("Timing,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
-        outputResultCSV("Tweak Image", tweakImageTimes)
         outputResultCSV("Calculate Vectors", vectorCalcTimes)
         outputResultCSV("Upsert Vectors", upsertTimes)
         outputResultCSV("Query Vectors", queryTimes)
@@ -206,6 +220,11 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
         outputResultCSV("Shrunk - Score > 0.95", shrunkReturnedOver95)
         outputResultCSV("Shrunk - Score > 0.99", shrunkReturnedOver99)
         outputResultCSV("Shrunk - Score > 0.999", shrunkReturnedOver999)
+
+        outputResultCSV("Reformatted - Score > 0.90", reformattedReturnedOver90)
+        outputResultCSV("Reformatted - Score > 0.95", reformattedReturnedOver95)
+        outputResultCSV("Reformatted - Score > 0.99", reformattedReturnedOver99)
+        outputResultCSV("Reformatted - Score > 0.999", reformattedReturnedOver999)
     });
 }
 
