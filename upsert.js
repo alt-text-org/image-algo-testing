@@ -6,7 +6,7 @@ if (!pineconeApiKey) {
     throw new Error("Pinecone API key not found")
 }
 
-async function run(pineconeUrls, vectorFile) {
+async function run(vectorFile, pineconeUrls) {
     const start = Date.now()
     const pinecones = {
         Cosine: makePineconeClient(pineconeApiKey, pineconeUrls.Cosine),
@@ -35,4 +35,4 @@ const pineconeUrls = {
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-await run("", pineconeUrls)
+await run("Goldberg-vectors.json", pineconeUrls)

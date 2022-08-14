@@ -21,7 +21,13 @@ function upserter(apiKey, url, namespace) {
 
         const delay = () => new Promise(resolve => setTimeout(resolve, 500));
         let attempt = 1
-        while (!(await upsertOnce(apiKey, url, payload))) {
+        while (true) {
+            const upserted = await upsertOnce(apiKey, url, payload)
+            if (upserted) {
+                console.error(`Upsert succeeded on attempt ${attempt}`)
+                return true
+            }
+
             console.error(`Upsert failed on attempt ${attempt}`)
             attempt++
             await delay()
@@ -40,7 +46,8 @@ async function upsertOnce(apiKey, url, payload) {
             },
             body: JSON.stringify(payload),
         }
-    ).catch(() => {
+    ).catch((err) => {
+        console.error(err)
         return null;
     });
 
@@ -49,7 +56,6 @@ async function upsertOnce(apiKey, url, payload) {
     } else {
         return false
     }
-
 }
 
 function queryer(apiKey, url, namespace) {
