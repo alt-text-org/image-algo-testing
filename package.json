@@ -2,7 +2,7 @@
   "name": "algo-test-harness",
   "version": "1.0.0",
   "description": "Test harness for several image similarity algorithms using the Pinecone vector DB",
-  "main": "index.js",
+  "main": "vectorize.js",
   "engines": {
     "node": "16.15.0"
   },

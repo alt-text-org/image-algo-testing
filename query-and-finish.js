@@ -1,13 +1,5 @@
-const fs = require("fs")
-
-const {createCanvas, loadImage} = require('canvas')
-
-const {sha256} = require("./src/sha256")
-const {pHash1024} = require("./src/phash/phash")
-const {dct1024Image} = require("./src/dct/dct")
-const {intensity1024} = require("./src/intensity/intensity")
-const {goldberg} = require("./src/image-signature-js/image_signature")
 const {makePineconeClient} = require("./src/pinecone")
+const {loadVectorGroups, outputResultCSV} = require("./src/common");
 
 const pineconeApiKey = process.env.PINECONE_API_KEY
 if (!pineconeApiKey) {
@@ -18,51 +10,12 @@ function countMatchesOver(matches, threshold) {
     return matches.filter(match => match.score > threshold).length
 }
 
-function average(arr) {
-    const sum = arr.reduce((a, b) => a + b, 0)
-    return (1.0 * sum) / arr.length
-}
-
-function getQuantile(arr, quantile) {
-    const idx = Math.floor(arr.length * quantile)
-    return arr[idx]
-}
-
 function correctPct(arr) {
     const correctCnt = arr.filter(b => b).length
     return (1.0 * correctCnt) / arr.length
 }
 
-function outputResultCSV(name, arr) {
-    console.log(
-        `${name},` +
-        `${average(arr)},` +
-        `${arr[0]},` +
-        `${getQuantile(arr, 0.25)},` +
-        `${getQuantile(arr, 0.50)},` +
-        `${getQuantile(arr, 0.75)},` +
-        `${getQuantile(arr, 0.90)},` +
-        `${getQuantile(arr, 0.95)},` +
-        `${getQuantile(arr, 0.99)},` +
-        `${getQuantile(arr, 0.999)},` +
-        `${arr[arr.length - 1]}`
-    )
-}
-
-async function loadImageFile(path) {
-    const image = await loadImage(path)
-    const canvas = createCanvas(image.width, image.height)
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(image, 0, 0, image.width, image.height)
-    const imageData = ctx.getImageData(0, 0, image.width, image.height)
-
-    return {
-        image: image,
-        imageData: imageData
-    }
-}
-
-async function getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes) {
+async function getResults(name, pinecone, metric, vectorGroups) {
     const sameReturnedOver90 = [];
     const sameReturnedOver95 = [];
     const sameReturnedOver99 = [];
@@ -143,14 +96,8 @@ async function getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
     reformattedReturnedOver99.sort((a, b) => a - b)
     reformattedReturnedOver999.sort((a, b) => a - b)
 
-    vectorCalcTimes.sort((a, b) => a - b)
-
     console.log("Similarity Function,Distance Metric,Top Result Correct - Same,Top Result Correct - Cropped,Top Result Correct - 2x Size,Top Result Correct - 1/2x Size, Top Result Correct - Reformatted")
     console.log(`${name},${metric},${correctPct(sameTopIsCorrect) * 100}%,${correctPct(croppedTopIsCorrect) * 100}%,${correctPct(grownTopIsCorrect) * 100}%,${correctPct(shrunkTopIsCorrect) * 100}%,${correctPct(reformattedTopIsCorrect) * 100}%`)
-    console.log()
-
-    console.log("Timing,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
-    outputResultCSV("Calculate Vectors", vectorCalcTimes)
     console.log()
 
     console.log("Category,Average,Minimum,25th Percentile,50th Percentile,75th Percentile,90th Percentile,95th Percentile,99th Percentile,99.9th Percentile,Max")
@@ -180,62 +127,21 @@ async function getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
     outputResultCSV("Reformatted - Score > 0.999", reformattedReturnedOver999)
 }
 
-function run(name, sourceFolder, vectorizer, pineconeUrls) {
+async function run(vectorFile, pineconeUrls) {
+    const start = Date.now()
     const pinecones = {
         Cosine: makePineconeClient(pineconeApiKey, pineconeUrls.Cosine),
         Euclidean: makePineconeClient(pineconeApiKey, pineconeUrls.Euclidean),
         DotProduct: makePineconeClient(pineconeApiKey, pineconeUrls.DotProduct)
     }
 
-    const start = Date.now()
-    const vectorCalcTimes = []
+    const vectorGroups = loadVectorGroups(vectorFile)
 
-    fs.readdir(sourceFolder, async (err, files) => {
-        const vectorGroups = {}
+    for (let [metric, pinecone] of Object.entries(pinecones)) {
+        await getResults(name, pinecone, metric, vectorGroups)
+    }
 
-        for (let file of files.filter(f => f.match(/.*jpg/))) {
-            console.error(`Processing ${file}`)
-            const {image, imageData} = await loadImageFile(`${sourceFolder}/${file}`)
-            const {image: shrunkImage, imageData: shrunkImageData} = await loadImageFile(`${sourceFolder}/shrunk/${file}`)
-            const {image: grownImage, imageData: grownImageData} = await loadImageFile(`${sourceFolder}/grown/${file}`)
-            const {image: croppedImage, imageData: croppedImageData} = await loadImageFile(`${sourceFolder}/cropped/${file}`)
-            const {image: reformattedImage, imageData: reformattedImageData} = await loadImageFile(`${sourceFolder}/reformatted/${file.replace('jpg', 'png')}`)
-
-            const vectorCalcStart = Date.now()
-            const vectorGroup = {
-                file: file,
-                same: await vectorizer(image, imageData),
-                cropped: await vectorizer(croppedImage, croppedImageData),
-                grown: await vectorizer(grownImage, grownImageData),
-                shrunk: await vectorizer(shrunkImage, shrunkImageData),
-                reformatted: await vectorizer(reformattedImage, reformattedImageData)
-            }
-            vectorCalcTimes.push(Date.now() - vectorCalcStart)
-
-            const sha = sha256(imageData)
-            vectorGroups[sha] = vectorGroup;
-        }
-
-        fs.writeFileSync(`${name}-vectors-${Date.now()}.json`, JSON.stringify(vectorGroups))
-
-        const promises = []
-        for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
-            promises.push((async () => {
-                const results = await Promise.all(Object.values(pinecones).map(pc => pc.upsert(sha, vectorGroup.same)))
-                console.error(`Upserted: ${vectorGroup.file}`)
-                return results.reduce((a, b) => a && b, true)
-            })())
-        }
-        const inserted = await Promise.all(promises)
-
-        console.log(`Inserted all,${inserted.reduce((a, b) => a && b, true)}`)
-
-        for (let [metric, pinecone] of Object.entries(pinecones)) {
-            await getResults(name, pinecone, metric, vectorGroups, vectorCalcTimes)
-        }
-
-        console.error(`Finished in ${Date.now() - start}ms`)
-    });
+    console.error(`Finished in ${Date.now() - start}ms`)
 }
 
 const pineconeUrls = {
@@ -243,4 +149,5 @@ const pineconeUrls = {
     DotProduct: "https://goldberg-544-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
-run("Goldberg","./images", goldberg, pineconeUrls)
+
+await run("", pineconeUrls)

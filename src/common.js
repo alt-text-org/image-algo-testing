@@ -1,4 +1,5 @@
-const {createCanvas, Image} = require("canvas");
+const {createCanvas} = require("canvas");
+const fs = require("fs")
 
 function shrinkImage(image, imageData, edgeLength) {
     let canvas = createCanvas(edgeLength, edgeLength)
@@ -20,5 +21,41 @@ function toGreyscale(imageData) {
     return greyscale;
 }
 
+function loadVectorGroups(file) {
+    const raw = fs.readFileSync(file)
+    const rawJson = raw.toString("utf8")
+    return JSON.parse(rawJson)
+}
+
+function average(arr) {
+    const sum = arr.reduce((a, b) => a + b, 0)
+    return (1.0 * sum) / arr.length
+}
+
+function getQuantile(arr, quantile) {
+    const idx = Math.floor(arr.length * quantile)
+    return arr[idx]
+}
+
+function outputResultCSV(name, arr) {
+    console.log(
+        `${name},` +
+        `${average(arr)},` +
+        `${arr[0]},` +
+        `${getQuantile(arr, 0.25)},` +
+        `${getQuantile(arr, 0.50)},` +
+        `${getQuantile(arr, 0.75)},` +
+        `${getQuantile(arr, 0.90)},` +
+        `${getQuantile(arr, 0.95)},` +
+        `${getQuantile(arr, 0.99)},` +
+        `${getQuantile(arr, 0.999)},` +
+        `${arr[arr.length - 1]}`
+    )
+}
+
 exports.shrinkImage = shrinkImage;
 exports.toGreyscale = toGreyscale;
+exports.loadVectorGroups = loadVectorGroups;
+exports.average = average;
+exports.getQuantile = getQuantile;
+exports.outputResultCSV = outputResultCSV;
