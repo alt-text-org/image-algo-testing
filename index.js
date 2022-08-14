@@ -216,8 +216,8 @@ function run(name, sourceFolder, vectorizer, pineconeUrls) {
 
             vectorGroups[sha] = vectorGroup;
             promises.push((async () => {
-                console.error(`Upserting: ${file}`)
                 const results = await Promise.all(Object.values(pinecones).map(pc => pc.upsert(sha, vectorGroup.same)))
+                console.error(`Upserted: ${file}`)
                 return results.reduce((a, b) => a && b, true)
             })())
         }
