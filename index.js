@@ -228,4 +228,4 @@ function run(name, metric, sourceFolder, handler, pineconeUrl) {
     });
 }
 
-run("Goldberg", "Cosine", "./sample-images", goldberg, "https://goldberg-544-cosine-b335ecb.svc.us-west1-gcp.pinecone.io")
+run("Goldberg", "Cosine", "./images", goldberg, "https://goldberg-544-cosine-b335ecb.svc.us-west1-gcp.pinecone.io")
