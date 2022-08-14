@@ -234,4 +234,4 @@ const pineconeUrls = {
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-run("Goldberg","./sample-images", goldberg, pineconeUrls)
+run("Goldberg","./images", goldberg, pineconeUrls)
