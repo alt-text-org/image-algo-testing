@@ -12,16 +12,18 @@ const cosine = (first, second, len) => {
     if (!Cosines[len]) {
         Cosines[len] = {};
     }
+    let lenCosines = Cosines[len]
 
-    if (!Cosines[len][first]) {
+    if (!lenCosines[first]) {
         Cosines[len][first] = {};
     }
+    let lenFirstCosines = Cosines[len][first]
 
-    if (!Cosines[len][first][second]) {
+    if (!lenFirstCosines[second]) {
         Cosines[len][first][second] = Math.cos((2 * first + 1) * Math.PI * second / 2 / len)
     }
 
-    return Cosines[len][first][second];
+    return lenFirstCosines[second];
 }
 
 const getCoff = (index, length) => {
