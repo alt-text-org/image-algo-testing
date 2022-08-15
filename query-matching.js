@@ -7,6 +7,10 @@ if (!pineconeApiKey) {
 }
 
 function pctTrue(arr) {
+    if (arr.length === 0) {
+        return 0
+    }
+
     const correctCnt = arr.filter(b => b).length
     return (1.0 * correctCnt) / arr.length
 }

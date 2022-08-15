@@ -6,7 +6,7 @@ fuzzy matching of images. To accomplish this, we leverage the Pinecone.io
 vector database which offers k-nearest-neighbor searches over feature vectors.
 While there's been much publicly available research on image similarity algorithms
 which use hamming distance comparison algorithms, we found little on leveraging 
-KNN searches, whose easy widespread availability is relatively new.
+KNN searches with non-ML based vector production.
 
 We tested 4 algorithms: 1024 pixel pHash, 1024 frequency discrete cosine transform,
 1024 pixel intensity, and the algorithm proposed in 
