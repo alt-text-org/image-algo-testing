@@ -127,7 +127,7 @@ async function getResults(name, pinecone, metric, vectorGroups) {
     outputResultCSV("Reformatted - Score > 0.999", reformattedReturnedOver999)
 }
 
-async function run(vectorFile, pineconeUrls) {
+async function run(name, vectorFile, pineconeUrls) {
     const start = Date.now()
     const pinecones = {
         Cosine: makePineconeClient(pineconeApiKey, pineconeUrls.Cosine),
@@ -150,4 +150,4 @@ const pineconeUrls = {
     Euclidean: "https://dct-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-run("DCT-vectors-1660528334395.json", pineconeUrls)
+run("DCT", "DCT-vectors-1660528334395.json", pineconeUrls)
