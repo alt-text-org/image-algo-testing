@@ -15,6 +15,7 @@ async function run(vectorFile, pineconeUrls) {
     }
     const vectorGroups = await loadVectorGroups(vectorFile)
 
+
     for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
         await pinecones.Cosine.upsert(sha, vectorGroup.same)
         await pinecones.Euclidean.upsert(sha, vectorGroup.same)

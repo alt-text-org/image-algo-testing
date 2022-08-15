@@ -75,7 +75,7 @@ Raw results are available in
 [this Google sheet](https://docs.google.com/spreadsheets/d/1Q2TXNwPgB-awFmWzeXYXX21OUVjkt0BU0ldPdtRdxTo/edit?usp=sharing).
 
 The vast bulk of the runtime for this process is spent computing feature vectors, if you would like to test other KNN
-query engines, the precomputed 
+query engines, the precomputed vectors are available upon request.
 
 Future Work
 -----------

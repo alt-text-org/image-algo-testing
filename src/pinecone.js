@@ -24,7 +24,6 @@ function upserter(apiKey, url, namespace) {
         while (true) {
             const upserted = await upsertOnce(apiKey, url, payload)
             if (upserted) {
-                console.error(`Upsert succeeded on attempt ${attempt}`)
                 return true
             }
 
