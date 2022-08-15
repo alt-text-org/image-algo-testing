@@ -1,6 +1,7 @@
 const fs = require("fs")
 
 const {createCanvas, loadImage} = require('canvas')
+const JSONStream = require("JSONStream")
 
 const {sha256} = require("./src/sha256")
 const {pHash1024} = require("./src/phash/phash")
@@ -52,7 +53,21 @@ function run(name, sourceFolder, vectorizer) {
             vectorGroups[sha] = vectorGroup;
         }
 
-        fs.writeFileSync(`${name}-vectors-${Date.now()}.json`, JSON.stringify(vectorGroups))
+        const jsonStream = JSONStream.stringifyObject();
+        const outputStream = fs.createWriteStream(`${name}-vectors-${Date.now()}.json`);
+        jsonStream.pipe(outputStream)
+        for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
+            jsonStream.write([sha, vectorGroup])
+        }
+        jsonStream.end();
+
+        outputStream.on(
+            "finish",
+            function handleFinish() {
+                console.log("Done");
+            }
+        );
+
 
         vectorCalcTimes.sort((a, b) => a - b)
         console.error(`Finished in ${Date.now() - start}ms`)
@@ -63,5 +78,5 @@ function run(name, sourceFolder, vectorizer) {
 
 // run("Goldberg","./images", goldberg)
 run("DCT", "./images", dct1024Image)
-run("Intensity", "./images", intensity1024)
-run("pHash", "./images", pHash1024)
+// run("Intensity", "./images", intensity1024)
+// run("pHash", "./images", pHash1024)
