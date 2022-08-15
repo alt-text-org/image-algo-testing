@@ -37,7 +37,7 @@ Process
 -------
 
 1. [process-images.js](process-images.js): For each image, compute and save to disk versions 2x size, 1/2x size,
-   with a 5% border crop, and in PNG format. We use the Node.js `node-canvas` library for this, which wraps 
+   with a 5% border crop, and in PNG format. We use the Node.js `canvas` library for this, which wraps 
    the `Cairo` open source image processing library.
 2. [vectorize.js](vectorize.js): For each matching algorithm, compute the feature vector for each image and
    all its alterations, as well as the SHA256 hash of the original image, then store the result in a large JSON 
