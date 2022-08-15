@@ -145,9 +145,9 @@ async function run(name, vectorFile, pineconeUrls) {
 }
 
 const pineconeUrls = {
-    Cosine: "https://phash-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
-    DotProduct: "https://phash-1024-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
-    Euclidean: "https://phash-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
+    Cosine: "https://intensity-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
+    DotProduct: "https://intensity-1024-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
+    Euclidean: "https://intensity-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-run("pHash", "pHash-vectors-1660522856022.json", pineconeUrls)
+run("Intensity", "Intensity-vectors-1660521980204.json", pineconeUrls)
