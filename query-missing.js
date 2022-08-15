@@ -55,25 +55,25 @@ async function run(name, vectorFile, pineconeUrls) {
         DotProduct: "https://goldberg-544-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
         Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
     }
-    await run("Goldberg", "", goldbergPineconeUrls)
+    await run("Goldberg", "missing-Goldberg-vectors-1660564797912.json", goldbergPineconeUrls)
 
     const pHashPineconeUrls = {
         Cosine: "https://phash-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
         Euclidean: "https://phash-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
     }
-    await run("pHash", "", pHashPineconeUrls)
+    await run("pHash", "missing-pHash-vectors-1660564896508.json", pHashPineconeUrls)
 
     const dctPineconeUrls = {
         Cosine: "https://dct-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
         Euclidean: "https://dct-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
     }
-    await run("DCT", "", dctPineconeUrls)
+    await run("DCT", "missing-DCT-vectors-1660564864437.json", dctPineconeUrls)
 
     const intensityPineconeUrls = {
         Cosine: "https://intensity-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
         Euclidean: "https://intensity-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
     }
-    await run("Intensity", "", intensityPineconeUrls)
+    await run("Intensity", "missing-Intensity-vectors-1660564928478.json", intensityPineconeUrls)
 
     console.error(`Finished in ${Date.now() - start}ms`)
 })()
