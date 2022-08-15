@@ -13,7 +13,7 @@ async function run(vectorFile, pineconeUrls) {
         Euclidean: makePineconeClient(pineconeApiKey, pineconeUrls.Euclidean),
         DotProduct: makePineconeClient(pineconeApiKey, pineconeUrls.DotProduct)
     }
-    const vectorGroups = loadVectorGroups(vectorFile)
+    const vectorGroups = await loadVectorGroups(vectorFile)
 
     const promises = []
     for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
@@ -35,4 +35,4 @@ const pineconeUrls = {
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-await run("Goldberg-vectors.json", pineconeUrls)
+run("Goldberg-vectors.json", pineconeUrls)

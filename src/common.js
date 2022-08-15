@@ -1,5 +1,6 @@
 const {createCanvas} = require("canvas");
 const fs = require("fs")
+const JSONStream = require("JSONStream");
 
 function shrinkImage(image, imageData, edgeLength) {
     let canvas = createCanvas(edgeLength, edgeLength)
@@ -21,10 +22,22 @@ function toGreyscale(imageData) {
     return greyscale;
 }
 
-function loadVectorGroups(file) {
-    const raw = fs.readFileSync(file)
-    const rawJson = raw.toString("utf8")
-    return JSON.parse(rawJson)
+async function loadVectorGroups(file) {
+    return new Promise((resolve, reject) => {
+        const jsonStream = JSONStream.parse([true, {emitKey: true}]);
+        const readableStream = fs.createReadStream(file, 'utf8').pipe(jsonStream);
+
+        readableStream.on('error', function (error) {
+            reject(error)
+        })
+
+        const result = {}
+        jsonStream.on('data', function(data) {
+            result[data.key] = data.value
+        });
+
+        jsonStream.on('close', () => resolve(result))
+    })
 }
 
 function average(arr) {

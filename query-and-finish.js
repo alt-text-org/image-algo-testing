@@ -135,7 +135,7 @@ async function run(vectorFile, pineconeUrls) {
         DotProduct: makePineconeClient(pineconeApiKey, pineconeUrls.DotProduct)
     }
 
-    const vectorGroups = loadVectorGroups(vectorFile)
+    const vectorGroups = await loadVectorGroups(vectorFile)
 
     for (let [metric, pinecone] of Object.entries(pinecones)) {
         await getResults(name, pinecone, metric, vectorGroups)
@@ -150,4 +150,4 @@ const pineconeUrls = {
     Euclidean: "https://goldberg-544-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-await run("", pineconeUrls)
+run("", pineconeUrls)

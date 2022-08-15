@@ -77,6 +77,6 @@ function run(name, sourceFolder, vectorizer) {
 }
 
 // run("Goldberg","./images", goldberg)
-run("DCT", "./images", dct1024Image)
+run("DCT", "./sample-images", dct1024Image)
 // run("Intensity", "./images", intensity1024)
 // run("pHash", "./images", pHash1024)
