@@ -91,7 +91,7 @@ async function getResults(name, pinecone, metric, vectorGroups) {
         await query(vectorGroup.shrunk, sha, shrunkMatchingScore, shrunkHighestNonMatching, shrunkTopIsCorrect, shrunkCorrectPresent)
         await query(vectorGroup.reformatted, sha, reformattedMatchingScore, reformattedHighestNonMatching, reformattedTopIsCorrect, reformattedCorrectPresent)
         numQueried++
-        console.error(`Queried ${metric} for ${numQueried}/${toQuery}`)
+        console.error(`${name}: Queried ${metric} for ${numQueried}/${toQuery}`)
     }
 
     sameMatchingScore.sort((a, b) => a - b)
