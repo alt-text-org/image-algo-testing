@@ -24,7 +24,7 @@ function toGreyscale(imageData) {
 
 async function loadVectorGroups(file) {
     return new Promise((resolve, reject) => {
-        const jsonStream = JSONStream.parse([true, {emitKey: true}]);
+        const jsonStream = JSONStream.parse([{emitKey: true}]);
         const readableStream = fs.createReadStream(file, 'utf8').pipe(jsonStream);
 
         readableStream.on('error', function (error) {
