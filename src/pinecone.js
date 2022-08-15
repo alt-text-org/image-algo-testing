@@ -9,6 +9,7 @@ function makeClient(apiKey, url) {
 
 function upserter(apiKey, url, namespace) {
     return async (sha256, vector) => {
+        console.log(`Uploading ${sha256}: ${vector.length}`)
         const payload = {
             vectors: [
                 {
