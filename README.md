@@ -136,3 +136,6 @@ Future Work
 - Testing additional algorithms
   - Would Goldberg perform better or worse with a wider lightness scale? 
 - Testing images with a watermark or text added
+- Reformatted images went from JPEG to PNG as those were the formats available. The performance matching those was
+  identical to matching identical images, hinting that we really needed to be going the other direction given that
+  JPEG is lossy.
