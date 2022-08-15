@@ -44,7 +44,7 @@ Process
    blob on disk.
 3. [upsert.js](upsert.js): Upsert a record to Pinecone for only the vector for the original image, with the image hash
    as the stored value.
-4. [query-and-finish.js](query-and-finish.js): For each image and all its alterations, perform a KNN query, recording
+4. [query-matching.js](query-matching.js): For each image and all its alterations, perform a KNN query, recording
    the metrics discussed below, and then print a summary of the findings in CSV format.
 
 
@@ -81,4 +81,5 @@ Future Work
 -----------
 
 1. Testing additional algorithms
-2. When the correct image was not the top result, we did not check whether it appeared lower in the results
+2. Testing images not present in the database
+3. When the correct image was not the top result, we did not check whether it appeared lower in the results
