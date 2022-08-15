@@ -9,7 +9,6 @@ function makeClient(apiKey, url) {
 
 function upserter(apiKey, url, namespace) {
     return async (sha256, vector) => {
-        console.log(`Uploading ${sha256}: ${vector.length}`)
         const payload = {
             vectors: [
                 {
@@ -47,8 +46,7 @@ async function upsertOnce(apiKey, url, payload) {
             },
             body: JSON.stringify(payload),
         }
-    ).catch((err) => {
-        console.error(err)
+    ).catch(() => {
         return null;
     });
 
