@@ -27,9 +27,9 @@ async function run(vectorFile, pineconeUrls) {
 }
 
 const pineconeUrls = {
-    Cosine: "https://dct-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
-    DotProduct: "https://dct-1024-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
-    Euclidean: "https://dct-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
+    Cosine: "https://phash-1024-cosine-b335ecb.svc.us-west1-gcp.pinecone.io",
+    DotProduct: "https://phash-1024-dot-b335ecb.svc.us-west1-gcp.pinecone.io",
+    Euclidean: "https://phash-1024-euclid-b335ecb.svc.us-west1-gcp.pinecone.io"
 }
 
-run("DCT-vectors-1660528334395.json", pineconeUrls)
+run("pHash-vectors-1660522856022.json", pineconeUrls)
