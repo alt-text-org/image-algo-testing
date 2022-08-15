@@ -86,7 +86,7 @@ The following results for a given `(algorithm, distance metric)` are recorded:
 Findings
 --------
 
-**Goldberg**
+**Goldberg - Cosine**
 - Goldberg with a Dot Product metric consistently fared the worst at almost all measures, and could be excluded
   from further consideration
 - Algorithm to compute is complex and the implementation available is more so
@@ -96,17 +96,17 @@ Findings
 - The largest and most reliable difference between matching and non-matching, with a score of 0.6 appearing to be a
   reasonably reliable cutoff which accords with the source paper
 
-**Discrete Cosine Transform**
+**Discrete Cosine Transform - Cosine**
 - Compute second slowest, but still very fast
 - Perfect correctness for all but cropped images, where it's still very reliable
 - No clear choice of a score that would reliably include non-exact matches while excluding others
 
-**Intensity**
+**Intensity - Cosine**
 - Computation quickest and simplest to understand
 - Excellent at matching all but cropped images
 - No clear choice of a score that would reliably include non-exact matches while excluding others
 
-**pHash**
+**pHash - Cosine**
 - Computation quick and simple to understand
 - Excellent at matching all but cropped images
 - No clear choice of a score that would reliably include non-exact matches while excluding others
