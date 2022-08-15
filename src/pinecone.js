@@ -52,7 +52,12 @@ async function upsertOnce(apiKey, url, payload) {
     });
 
     if (resp) {
-        return !!resp.ok;
+        if (resp.ok) {
+            return true
+        } else {
+            console.error(`HTTP ${resp.status} ${resp.statusText}: ${await resp.text()}`)
+            return false
+        }
     } else {
         return false
     }
