@@ -15,17 +15,13 @@ async function run(vectorFile, pineconeUrls) {
     }
     const vectorGroups = await loadVectorGroups(vectorFile)
 
-    const promises = []
     for (const [sha, vectorGroup] of Object.entries(vectorGroups)) {
-        promises.push((async () => {
-            const results = await Promise.all(Object.values(pinecones).map(pc => pc.upsert(sha, vectorGroup.same)))
-            console.log(`Upserted: ${vectorGroup.file}`)
-            return results.reduce((a, b) => a && b, true)
-        })())
+        await pinecones.Cosine.upsert(sha, vectorGroup.same)
+        await pinecones.Euclidean.upsert(sha, vectorGroup.same)
+        await pinecones.DotProduct.upsert(sha, vectorGroup.same)
+        console.log(`Upserted: ${vectorGroup.file}`)
     }
-    const inserted = await Promise.all(promises)
 
-    console.log(`Inserted all,${inserted.reduce((a, b) => a && b, true)}`)
     console.log(`Finished in ${Date.now() - start}ms`)
 }
 
