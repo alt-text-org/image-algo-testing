@@ -132,7 +132,7 @@ async function getResults(name, pinecone, metric, vectorGroups) {
 
 async function run(name, vectorFile, pineconeUrls) {
     const pinecones = {}
-    for (let [metric, url] of pineconeUrls) {
+    for (let [metric, url] of Object.entries(pineconeUrls)) {
         pinecones[metric] = makePineconeClient(pineconeApiKey, url)
     }
 
