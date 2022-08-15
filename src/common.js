@@ -1,4 +1,4 @@
-const {createCanvas} = require("canvas");
+const {createCanvas, loadImage} = require("canvas");
 const fs = require("fs")
 const JSONStream = require("JSONStream");
 
@@ -66,9 +66,23 @@ function outputResultCSV(name, arr) {
     )
 }
 
+async function loadImageFile(path) {
+    const image = await loadImage(path)
+    const canvas = createCanvas(image.width, image.height)
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(image, 0, 0, image.width, image.height)
+    const imageData = ctx.getImageData(0, 0, image.width, image.height)
+
+    return {
+        image: image,
+        imageData: imageData
+    }
+}
+
 exports.shrinkImage = shrinkImage;
 exports.toGreyscale = toGreyscale;
 exports.loadVectorGroups = loadVectorGroups;
 exports.average = average;
 exports.getQuantile = getQuantile;
 exports.outputResultCSV = outputResultCSV;
+exports.loadImageFile = loadImageFile;

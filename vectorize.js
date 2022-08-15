@@ -8,20 +8,7 @@ const {pHash1024} = require("./src/phash/phash")
 const {dct1024Image} = require("./src/dct/dct")
 const {intensity1024} = require("./src/intensity/intensity")
 const {goldberg} = require("./src/image-signature-js/image_signature")
-const {outputResultCSV} = require("./src/common");
-
-async function loadImageFile(path) {
-    const image = await loadImage(path)
-    const canvas = createCanvas(image.width, image.height)
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(image, 0, 0, image.width, image.height)
-    const imageData = ctx.getImageData(0, 0, image.width, image.height)
-
-    return {
-        image: image,
-        imageData: imageData
-    }
-}
+const {outputResultCSV, loadImageFile} = require("./src/common");
 
 function run(name, sourceFolder, vectorizer) {
     const start = Date.now()
