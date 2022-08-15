@@ -1,6 +1,7 @@
 images/
 .idea/
 node_modules/
+results/
 
 sample-images/reformatted/
 sample-images/grown

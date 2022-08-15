@@ -37,9 +37,10 @@ We ran an initial round of tests collecting information only on whether the top 
 matches with a score over some value. Examining our findings it quickly became clear that we had misunderstood the 
 score field of returned matches, believing that it would be in [0, 1] for all metrics, which was only the case for
 Cosine. These initial results did however make it apparent that the Dot Product metric was not appropriate for any 
-algorithm except possibly Goldberg, so it was omitted for other algorithms in the second round of tests. While the 
-results from the first round did not directly influence our findings, the raw data is available in a Google sheet 
-linked below.
+algorithm except possibly Goldberg,  so it was omitted for other algorithms in the second round of tests. The Euclidean
+distance metric performed decently, but had significant issues matching identical images. For lack of time, we chose to
+drop it as well for all algorithms. While the results from the first round did not directly influence our findings, 
+the raw data is available in a Google sheet linked below.
 
 
 Process
@@ -64,11 +65,11 @@ Process
 Goals
 -----
 
-Three metrics were of interest for each algorithm:
+Three things were of interest for each algorithm:
 
 - Vector computation time 
 - Whether the correct record was the top result for each image and all its alterations
-- What score threshold would result in the fewest false positives without also excluding correct results
+- How reliably non-matching results could be excluded
 
 
 Result Format
@@ -85,9 +86,41 @@ The following results for a given `(algorithm, distance metric)` are recorded:
 Findings
 --------
 
+**Goldberg**
+- Goldberg with a Dot Product metric consistently fared the worst at almost all measures, and could be excluded
+  from further consideration
+- Algorithm to compute is complex and the implementation available is more so
+- The slowest to compute by several orders of magnitude, but the tested implementation may be significantly optimizable
+- The least reliable for all but cropped images, which are the least important, but the difference was 
+  mostly within tolerance
+- The largest and most reliable difference between matching and non-matching, with a score of 0.6 appearing to be a
+  reasonably reliable cutoff which accords with the source paper
+
+**Discrete Cosine Transform**
+- Compute second slowest, but still very fast
+- Perfect correctness for all but cropped images, where it's still very reliable
+- No clear choice of a score that would reliably include non-exact matches while excluding others
+
+**Intensity**
+- Computation quickest and simplest to understand
+- Excellent at matching all but cropped images
+- No clear choice of a score that would reliably include non-exact matches while excluding others
+
+**pHash**
+- Computation quick and simple to understand
+- Excellent at matching all but cropped images
+- No clear choice of a score that would reliably include non-exact matches while excluding others
+
+**Conclusion**
+Based on the findings above, we will endeavor to optimize Goldberg and determine if performance is acceptable. If it is
+not, we may still opt to use it. Other algorithms fall down hard on the key question of separating altered but matching 
+images from searches returning no similar results.
 
 Data Availability
 -----------------
+
+Raw results are available in
+[this Google sheet](https://docs.google.com/spreadsheets/d/12rxQ4aJhzthBLZ1Z9JEANVloY3u8_rjWPbfIHfQz3Ms/edit?usp=sharing)
 
 The vast bulk of the runtime for this process is spent computing feature vectors, if you would like to test other KNN
 query engines, the precomputed vectors are available upon request.
@@ -100,3 +133,5 @@ Future Work
 -----------
 
 - Testing additional algorithms
+  - Would Goldberg perform better or worse with a wider lightness scale? 
+- Testing images with a watermark or text added
