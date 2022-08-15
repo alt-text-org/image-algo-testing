@@ -33,6 +33,7 @@ async function loadVectorGroups(file) {
 
         const result = {}
         jsonStream.on('data', function(data) {
+            console.log(`Reading ${data.key}: ${typeof data.value}`)
             result[data.key] = data.value
         });
 
