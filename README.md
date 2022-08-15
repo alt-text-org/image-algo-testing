@@ -112,6 +112,7 @@ Findings
 - No clear choice of a score that would reliably include non-exact matches while excluding others
 
 **Conclusion**
+
 Based on the findings above, we will endeavor to optimize Goldberg and determine if performance is acceptable. If it is
 not, we may still opt to use it. Other algorithms fall down hard on the key question of separating altered but matching 
 images from searches returning no similar results.
