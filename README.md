@@ -35,8 +35,8 @@ to very long runtimes, but opting for a better suited language would mean a full
 
 We ran an initial round of tests collecting information only on whether the top match was correct and the count of 
 matches with a score over some value. Examining our findings it quickly became clear that we had misunderstood the 
-score field of returned matches, believing that it would be in [0, 1] for all metrics, which was only the case for
-Cosine. These initial results did however make it apparent that the Dot Product metric was not appropriate for any 
+score field of returned matches, believing that it would be in [0, 1] for all metrics. These initial results did 
+however make it apparent that the Dot Product metric was not appropriate for any 
 algorithm except possibly Goldberg,  so it was omitted for other algorithms in the second round of tests. The Euclidean
 distance metric performed decently, but had significant issues matching identical images. For lack of time, we chose to
 drop it as well for all algorithms. While the results from the first round did not directly influence our findings, 
