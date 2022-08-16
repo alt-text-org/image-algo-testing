@@ -91,6 +91,8 @@ Findings
   from further consideration
 - Algorithm to compute is complex and the implementation available is more so
 - The slowest to compute by several orders of magnitude, but the tested implementation may be significantly optimizable
+  - *Note:* After this document was drafted, we looked into optimizing the algorithm implementation, and were able to
+    improve it approximately 3x. It appears there may be additional avenues for improvement.
 - The least reliable for all but cropped images, which are the least important, but the difference was 
   mostly within tolerance
 - The largest and most reliable difference between matching and non-matching, with a score of 0.6 appearing to be a
