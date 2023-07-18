@@ -31,7 +31,7 @@ and in a different image format.
 The choice of JavaScript was forced by the existing codebase, including all the matching algorithm options,
 already being in the language. The single-threaded nature of JavaScript was a major disadvantage and contributed
 to very long runtimes, but opting for a better suited language would mean a full rewrite of the 
-[alt-text.org](https://alt-text.org) backend.
+[alt-text.org](https://alt-text.org) backend. *Note: since this was written the algorithm has been implemented in [Rust](https://github.com/alt-text-org/image-match-rs)*.
 
 We ran an initial round of tests collecting information only on whether the top match was correct and the count of 
 matches with a score over some value. Examining our findings it quickly became clear that we had misunderstood the 
